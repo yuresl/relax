@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sons de Chuva para Dormir</title>
+    <!-- Importando Google Material Icons -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: radial-gradient(
+          ellipse at bottom,
+          #0d1b2a 0%,
+          #000000 100%
+        );
+        color: #fff;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stars {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background: transparent
+          url("https://raw.githubusercontent.com/VincentGarreau/particles.js/master/demo/media/star-bg.png")
+          repeat top center;
+        animation: moveStars 200s linear infinite;
+        z-index: -3;
+      }
+
+      @keyframes moveStars {
+        from {
+          background-position: 0 0;
+        }
+        to {
+          background-position: -10000px 5000px;
+        }
+      }
+
+      .lightning {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background: white;
+        opacity: 0;
+        z-index: -2;
+        pointer-events: none;
+      }
+
+      @keyframes flash {
+        0% {
+          opacity: 0;
+        }
+        2% {
+          opacity: 0.8;
+        }
+        4% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .container {
+        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        z-index: 1;
+      }
+
+      h1 {
+        margin-top: 0;
+        font-size: 2rem;
+        color: #fff;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .sound-selector {
+        margin: 20px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .sound-button {
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 10px;
+        padding: 15px;
+        color: #fff;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .sound-button:hover,
+      .sound-button.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .sound-button.active {
+        border-left: 4px solid #64b5f6;
+      }
+
+      .controls {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .volume-control {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .volume-control input {
+        flex: 1;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 5px;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.2);
+        outline: none;
+      }
+
+      .volume-control input::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: #64b5f6;
+        cursor: pointer;
+      }
+
+      .timer-control {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .timer-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .timer-button {
+        flex: 1;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 5px;
+        padding: 10px;
+        color: #fff;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .timer-button:hover,
+      .timer-button.active {
+        background-color: rgba(100, 181, 246, 0.3);
+      }
+
+      .timer-button.active {
+        background-color: rgba(100, 181, 246, 0.5);
+      }
+
+      .timer-display {
+        font-size: 1.2rem;
+        margin-top: 10px;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .rain-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+        opacity: 0.6;
+      }
+
+      .raindrop {
+        position: absolute;
+        width: 2px;
+        height: 15px;
+        background: linear-gradient(transparent, rgba(255, 255, 255, 0.5));
+        border-radius: 50%;
+        animation: fall linear infinite;
+      }
+
+      #muteButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 10px;
+        padding: 10px;
+        color: #fff;
+        cursor: pointer;
+      }
+
+      #muteButton:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Estilo para os ícones do Material Icons */
+      .material-icons {
+        font-size: 20px;
+        vertical-align: middle;
+      }
+
+      @keyframes fall {
+        0% {
+          transform: translateY(-100px);
+        }
+        100% {
+          transform: translateY(100vh);
+        }
+      }
+
+      .footer {
+        margin-top: 30px;
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          width: 85%;
+          padding: 20px;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .timer-buttons {
+          flex-wrap: wrap;
+        }
+
+        .timer-button {
+          flex: 1 0 40%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stars"></div>
+    <div class="lightning" id="lightning"></div>
+    <div class="rain-animation" id="rainAnimation"></div>
+
+    <div class="container">
+      <h1>Sons de Chuva para Dormir</h1>
+      <div class="sound-selector">
+        <button class="sound-button active" data-sound="night_rain_thunder.mp3">
+          <span>Chuva Noturna com Trovões</span>
+          <span>15:00</span>
+        </button>
+        <button class="sound-button" data-sound="calming_rain.mp3">
+          <span>Chuva Calma</span>
+          <span>1:48</span>
+        </button>
+      </div>
+
+      <audio id="rainSound" loop></audio>
+
+      <div class="controls">
+        <div class="volume-control">
+          <span>Volume</span>
+          <input
+            type="range"
+            id="volumeControl"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.7"
+          />
+        </div>
+
+        <button id="muteButton" class="sound-button">
+          <i class="material-icons" id="muteIcon">volume_up</i>
+          <span id="muteText">Silenciar</span>
+        </button>
+
+        <div class="timer-control">
+          <span>Temporizador</span>
+          <div class="timer-buttons">
+            <button class="timer-button" data-time="0">Sem timer</button>
+            <button class="timer-button" data-time="15">15 min</button>
+            <button class="timer-button" data-time="30">30 min</button>
+            <button class="timer-button" data-time="60">1 hora</button>
+          </div>
+          <div class="timer-display" id="timerDisplay">Sem temporizador</div>
+        </div>
+      </div>
+
+      <div class="footer">Sons obtidos do Pixabay - Licença gratuita</div>
+    </div>
+
+    <script>
+      const rainAnimation = document.getElementById("rainAnimation");
+      const lightning = document.getElementById("lightning");
+
+      function createRaindrops() {
+        const numberOfDrops = Math.floor(window.innerWidth / 5);
+        rainAnimation.innerHTML = "";
+
+        for (let i = 0; i < numberOfDrops; i++) {
+          const drop = document.createElement("div");
+          drop.classList.add("raindrop");
+
+          const posX = Math.random() * window.innerWidth;
+          const delay = Math.random() * 2;
+          const duration = Math.random() * 0.5 + 0.5;
+
+          drop.style.left = `${posX}px`;
+          drop.style.animationDelay = `${delay}s`;
+          drop.style.animationDuration = `${duration}s`;
+
+          rainAnimation.appendChild(drop);
+        }
+      }
+
+      function lightningEffect() {
+        // if (Math.random() > 0.97) {
+        //   lightning.style.animation = "flash 0.5s ease";
+        //   setTimeout(() => {
+        //     lightning.style.animation = "none";
+        //   }, 500);
+        // }
+        requestAnimationFrame(lightningEffect);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        createRaindrops();
+        window.addEventListener("resize", createRaindrops);
+        lightningEffect();
+
+        const audioPlayer = document.getElementById("rainSound");
+        const muteButton = document.getElementById("muteButton");
+        const muteIcon = document.getElementById("muteIcon");
+        const muteText = document.getElementById("muteText");
+        const volumeControl = document.getElementById("volumeControl");
+        const soundButtons = document.querySelectorAll(".sound-button");
+        const timerButtons = document.querySelectorAll(".timer-button");
+        const timerDisplay = document.getElementById("timerDisplay");
+
+        let currentSound = "night_rain_thunder.mp3";
+        let timerDuration = 0;
+        let timerEndTime = 0;
+        let timerInterval = null;
+        let isMuted = false;
+        let previousVolume = volumeControl.value;
+
+        audioPlayer.src = currentSound;
+        audioPlayer.volume = volumeControl.value;
+
+        // Tenta iniciar o áudio automaticamente
+        audioPlayer.play().catch((error) => {
+          console.log("Auto-play prevented:", error);
+          // Muitos navegadores bloqueiam autoplay, então isso é esperado
+        });
+
+        soundButtons.forEach((button) => {
+          if (!button.id || button.id !== "muteButton") {
+            button.addEventListener("click", function () {
+              soundButtons.forEach((btn) => {
+                if (!btn.id || btn.id !== "muteButton") {
+                  btn.classList.remove("active");
+                }
+              });
+              this.classList.add("active");
+
+              currentSound = this.getAttribute("data-sound");
+              audioPlayer.src = currentSound;
+
+              // Se não estiver mudo, toca o áudio
+              if (!isMuted) {
+                audioPlayer
+                  .play()
+                  .catch((e) => console.log("Playback prevented:", e));
+              }
+            });
+          }
+        });
+
+        volumeControl.addEventListener("input", function () {
+          audioPlayer.volume = this.value;
+          previousVolume = this.value;
+
+          // Se o volume for definido como 0, muda o ícone para mudo
+          if (parseFloat(this.value) === 0) {
+            muteIcon.textContent = "volume_off";
+            muteText.textContent = "Ativar Som";
+            isMuted = true;
+            audioPlayer.muted = true;
+          }
+          // Se o volume for aumentado a partir de 0, desmuta
+          else if (isMuted) {
+            muteIcon.textContent = "volume_up";
+            muteText.textContent = "Silenciar";
+            isMuted = false;
+            audioPlayer.muted = false;
+          }
+        });
+
+        timerButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            timerButtons.forEach((btn) => btn.classList.remove("active"));
+            this.classList.add("active");
+
+            clearInterval(timerInterval);
+            timerDuration = parseInt(this.getAttribute("data-time"));
+
+            if (timerDuration === 0) {
+              timerDisplay.textContent = "Sem temporizador";
+              return;
+            }
+
+            timerEndTime = Date.now() + timerDuration * 60 * 1000;
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+              updateTimerDisplay();
+              if (Date.now() >= timerEndTime) {
+                audioPlayer.pause();
+                clearInterval(timerInterval);
+                timerDisplay.textContent = "Temporizador finalizado";
+              }
+            }, 1000);
+          });
+        });
+
+        function updateTimerDisplay() {
+          const remainingTime = Math.max(0, timerEndTime - Date.now());
+          const minutes = Math.floor(remainingTime / (60 * 1000));
+          const seconds = Math.floor((remainingTime % (60 * 1000)) / 1000);
+          timerDisplay.textContent = `${minutes}:${seconds
+            .toString()
+            .padStart(2, "0")} restantes`;
+        }
+
+        muteButton.addEventListener("click", function () {
+          isMuted = !isMuted;
+          audioPlayer.muted = isMuted;
+
+          // Altera o ícone usando Material Icons
+          if (isMuted) {
+            muteIcon.textContent = "volume_off";
+            muteText.textContent = "Ativar Som";
+            // Salva o volume atual para restaurar depois
+            previousVolume = audioPlayer.volume;
+          } else {
+            muteIcon.textContent = "volume_up";
+            muteText.textContent = "Silenciar";
+            // Garantir que o áudio esteja tocando quando desmutado
+            audioPlayer
+              .play()
+              .catch((e) => console.log("Playback prevented:", e));
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
