@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sons de Chuva para Dormir</title>
-    <!-- Importando Google Material Icons -->
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
@@ -255,6 +254,24 @@
         color: rgba(255, 255, 255, 0.6);
       }
 
+      #toggleModalButton {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 2;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 10px;
+        padding: 10px;
+        color: #fff;
+        cursor: pointer;
+        transition: opacity 0.3s ease;
+      }
+
+      #toggleModalButton:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+
       @media (max-width: 600px) {
         .container {
           width: 85%;
@@ -280,16 +297,16 @@
     <div class="lightning" id="lightning"></div>
     <div class="rain-animation" id="rainAnimation"></div>
 
-    <div class="container">
+    <button id="toggleModalButton">Esconder Modal</button>
+
+    <div class="container" id="modalContainer">
       <h1>Sons de Chuva para Dormir</h1>
       <div class="sound-selector">
         <button class="sound-button active" data-sound="night_rain_thunder.mp3">
           <span>Chuva Noturna com Trovões</span>
-          <span>15:00</span>
         </button>
         <button class="sound-button" data-sound="calming_rain.mp3">
           <span>Chuva Calma</span>
-          <span>1:48</span>
         </button>
       </div>
 
@@ -312,7 +329,6 @@
           <i class="material-icons" id="muteIcon">volume_up</i>
           <span id="muteText">Silenciar</span>
         </button>
-
         <div class="timer-control">
           <span>Temporizador</span>
           <div class="timer-buttons">
@@ -331,6 +347,59 @@
     <script>
       const rainAnimation = document.getElementById("rainAnimation");
       const lightning = document.getElementById("lightning");
+      const toggleModalButton = document.getElementById("toggleModalButton");
+      const modalContainer = document.getElementById("modalContainer");
+
+      let isModalHidden = false;
+      let mouseTimeout;
+      let buttonTimeout;
+      const idleTime = 3000; // 3 segundos para o cursor
+      const buttonIdleTime = 3000; // 3 segundos para o botão
+
+      function toggleModal() {
+        isModalHidden = !isModalHidden;
+        modalContainer.style.display = isModalHidden ? "none" : "block";
+        toggleModalButton.textContent = isModalHidden
+          ? "Mostrar Modal"
+          : "Esconder Modal";
+      }
+
+      toggleModalButton.addEventListener("click", toggleModal);
+
+      // Função para esconder o cursor após inatividade
+      function resetMouseTimer() {
+        clearTimeout(mouseTimeout);
+        document.body.style.cursor = "auto";
+
+        mouseTimeout = setTimeout(() => {
+          document.body.style.cursor = "none";
+        }, idleTime);
+      }
+
+      // Função para esconder o botão após inatividade
+      function resetButtonTimer() {
+        clearTimeout(buttonTimeout);
+        toggleModalButton.style.opacity = "1";
+
+        buttonTimeout = setTimeout(() => {
+          toggleModalButton.style.opacity = "0";
+        }, buttonIdleTime);
+      }
+
+      // Detectar movimento do mouse para ambas as funções
+      document.addEventListener("mousemove", function () {
+        resetMouseTimer();
+        resetButtonTimer();
+      });
+
+      document.addEventListener("keypress", function () {
+        resetMouseTimer();
+        resetButtonTimer();
+      });
+
+      // Iniciar os timers
+      resetMouseTimer();
+      resetButtonTimer();
 
       function createRaindrops() {
         const numberOfDrops = Math.floor(window.innerWidth / 5);
@@ -386,17 +455,21 @@
         audioPlayer.src = currentSound;
         audioPlayer.volume = volumeControl.value;
 
-        // Tenta iniciar o áudio automaticamente
         audioPlayer.play().catch((error) => {
           console.log("Auto-play prevented:", error);
-          // Muitos navegadores bloqueiam autoplay, então isso é esperado
         });
 
         soundButtons.forEach((button) => {
-          if (!button.id || button.id !== "muteButton") {
+          if (
+            !button.id ||
+            (button.id !== "muteButton" && button.id !== "toggleModalButton")
+          ) {
             button.addEventListener("click", function () {
               soundButtons.forEach((btn) => {
-                if (!btn.id || btn.id !== "muteButton") {
+                if (
+                  !btn.id ||
+                  (btn.id !== "muteButton" && btn.id !== "toggleModalButton")
+                ) {
                   btn.classList.remove("active");
                 }
               });
@@ -405,7 +478,6 @@
               currentSound = this.getAttribute("data-sound");
               audioPlayer.src = currentSound;
 
-              // Se não estiver mudo, toca o áudio
               if (!isMuted) {
                 audioPlayer
                   .play()
@@ -419,15 +491,12 @@
           audioPlayer.volume = this.value;
           previousVolume = this.value;
 
-          // Se o volume for definido como 0, muda o ícone para mudo
           if (parseFloat(this.value) === 0) {
             muteIcon.textContent = "volume_off";
             muteText.textContent = "Ativar Som";
             isMuted = true;
             audioPlayer.muted = true;
-          }
-          // Se o volume for aumentado a partir de 0, desmuta
-          else if (isMuted) {
+          } else if (isMuted) {
             muteIcon.textContent = "volume_up";
             muteText.textContent = "Silenciar";
             isMuted = false;
@@ -475,16 +544,13 @@
           isMuted = !isMuted;
           audioPlayer.muted = isMuted;
 
-          // Altera o ícone usando Material Icons
           if (isMuted) {
             muteIcon.textContent = "volume_off";
             muteText.textContent = "Ativar Som";
-            // Salva o volume atual para restaurar depois
             previousVolume = audioPlayer.volume;
           } else {
             muteIcon.textContent = "volume_up";
             muteText.textContent = "Silenciar";
-            // Garantir que o áudio esteja tocando quando desmutado
             audioPlayer
               .play()
               .catch((e) => console.log("Playback prevented:", e));
